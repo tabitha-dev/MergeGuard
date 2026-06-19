@@ -1,0 +1,56 @@
+name: MergeGuard Self Test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  self-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout action repo
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run check
+
+      - name: Build action
+        run: npm run build
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium --with-deps
+
+      - name: Start demo site
+        run: |
+          python3 -m http.server 4173 --directory examples/demo-site &
+          sleep 3
+
+      - name: Run MergeGuard against demo site
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          preview-url: http://127.0.0.1:4173
+          mode: deterministic
+          fail-on-severity: none
+
+      - name: Upload Evidence Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mergeguard-evidence
+          path: ./artifacts/
+          retention-days: 14
