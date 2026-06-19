@@ -4,13 +4,11 @@
   "description": "Agentic frontend PR reviewer using Playwright browser evidence.",
   "private": true,
   "type": "module",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "build": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
+    "build": "tsc",
     "check": "tsc --noEmit",
-    "format": "prettier --write .",
-    "release:check": "npm run check && npm run build",
-    "playwright:install": "playwright install chromium --with-deps"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
@@ -22,7 +20,6 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
-    "@vercel/ncc": "^0.38.3",
     "prettier": "^3.5.0",
     "typescript": "^5.8.0"
   },

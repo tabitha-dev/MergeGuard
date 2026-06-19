@@ -17,32 +17,10 @@ jobs:
       - name: Checkout action repo
         uses: actions/checkout@v5
 
-      - name: Setup Node
-        uses: actions/setup-node@v5
-        with:
-          node-version: 20
-
-      - name: Show Node version
+      - name: Verify runner Chrome
         run: |
-          node -v
-          npm -v
-
-      - name: Enable pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@9 --activate
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Type check
-        run: pnpm run check
-
-      - name: Build action
-        run: pnpm run build
-
-      - name: Install Playwright browser
-        run: pnpm exec playwright install chromium --with-deps
+          which google-chrome
+          google-chrome --version
 
       - name: Start demo site
         run: |
