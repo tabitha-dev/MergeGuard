@@ -22,17 +22,27 @@ jobs:
         with:
           node-version: 20
 
+      - name: Show Node version
+        run: |
+          node -v
+          npm -v
+
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9 --activate
+
       - name: Install dependencies
-        run: npm install --no-audit --no-fund --no-package-lock
+        run: pnpm install --no-frozen-lockfile
 
       - name: Type check
-        run: npm run check
+        run: pnpm run check
 
       - name: Build action
-        run: npm run build
+        run: pnpm run build
 
       - name: Install Playwright browser
-        run: npx playwright install chromium --with-deps
+        run: pnpm exec playwright install chromium --with-deps
 
       - name: Start demo site
         run: |
