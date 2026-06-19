@@ -13,8 +13,23 @@ import { ensureDir, writeJson } from './util/fs.js';
 import type { RunSummary } from './schemas/run-summary.js';
 import type { Severity } from './schemas/finding.js';
 
+type InputOptions = { required?: boolean };
+
+function readInput(name: string, options: InputOptions = {}): string {
+  const fromCore = core.getInput(name);
+  const normalized = name.replace(/[^A-Za-z0-9]/g, '_').toUpperCase();
+  const fromEnv = process.env[`INPUT_${normalized}`] || process.env[`MERGEGUARD_${normalized}`] || '';
+  const value = (fromCore || fromEnv).trim();
+
+  if (options.required && !value) {
+    throw new Error(`Input required and not supplied: ${name}`);
+  }
+
+  return value;
+}
+
 function readMode(): 'deterministic' | 'agentic' {
-  const value = core.getInput('mode') || 'deterministic';
+  const value = readInput('mode') || 'deterministic';
   if (value !== 'deterministic' && value !== 'agentic') {
     throw new Error('mode must be deterministic or agentic');
   }
@@ -22,7 +37,7 @@ function readMode(): 'deterministic' | 'agentic' {
 }
 
 function readLlmProvider(): LlmProvider {
-  const value = core.getInput('llm-provider') || 'openai';
+  const value = readInput('llm-provider') || 'openai';
   if (value !== 'openai' && value !== 'rapidapi') {
     throw new Error('llm-provider must be openai or rapidapi');
   }
@@ -30,7 +45,7 @@ function readLlmProvider(): LlmProvider {
 }
 
 function readFailOnSeverity(): 'none' | Severity {
-  const value = core.getInput('fail-on-severity') || 'high';
+  const value = readInput('fail-on-severity') || 'high';
   if (!['none', 'high', 'medium', 'low'].includes(value)) {
     throw new Error('fail-on-severity must be none, high, medium, or low');
   }
@@ -39,18 +54,18 @@ function readFailOnSeverity(): 'none' | Severity {
 
 async function main(): Promise<void> {
   const started = Date.now();
-  const githubToken = core.getInput('github-token', { required: true });
-  const previewUrl = core.getInput('preview-url', { required: true });
-  const openaiApiKey = core.getInput('openai-api-key');
-  const rapidApiKey = core.getInput('rapidapi-key');
-  const rapidApiHost = core.getInput('rapidapi-host') || 'open-ai21.p.rapidapi.com';
-  const rapidApiEndpoint = core.getInput('rapidapi-endpoint') || 'claude3';
+  const githubToken = readInput('github-token', { required: true });
+  const previewUrl = readInput('preview-url', { required: true });
+  const openaiApiKey = readInput('openai-api-key');
+  const rapidApiKey = readInput('rapidapi-key');
+  const rapidApiHost = readInput('rapidapi-host') || 'open-ai21.p.rapidapi.com';
+  const rapidApiEndpoint = readInput('rapidapi-endpoint') || 'claude3';
   const llmProvider = readLlmProvider();
-  const artifactDir = core.getInput('artifact-dir') || './artifacts';
-  const model = core.getInput('model') || 'gpt-4o-mini';
+  const artifactDir = readInput('artifact-dir') || './artifacts';
+  const model = readInput('model') || 'gpt-4o-mini';
   const mode = readMode();
   const failOnSeverity = readFailOnSeverity();
-  const commentMarker = core.getInput('comment-marker') || '<!-- mergeguard-ui-review -->';
+  const commentMarker = readInput('comment-marker') || '<!-- mergeguard-ui-review -->';
 
   await ensureDir(artifactDir);
 

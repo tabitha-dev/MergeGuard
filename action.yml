@@ -1,56 +1,100 @@
 name: MergeGuard UI
-description: 'Agentic frontend PR reviewer using Playwright browser evidence'
+description: 'Agentic frontend PR reviewer using Playwright browser evidence before merge.'
+author: Tabitha Khadse
 
 inputs:
   github-token:
-    description: 'GitHub token used to read PR metadata and post comments'
+    description: 'GitHub token used to read PR metadata and post comments.'
     required: true
 
   preview-url:
-    description: 'Preview deployment URL to test'
+    description: 'Preview deployment URL to test.'
     required: true
 
   mode:
-    description: 'Run mode. Options: deterministic or agentic'
+    description: 'Review mode. Use deterministic or agentic.'
     required: false
     default: deterministic
 
   fail-on-severity:
-    description: 'Minimum severity that should fail the check. Options: none, high, medium, low'
+    description: 'Minimum severity that should fail the action. Options are none, high, medium, low.'
     required: false
     default: high
 
+  artifact-dir:
+    description: 'Local directory where screenshots, traces, logs, and run_summary.json are saved.'
+    required: false
+    default: ./artifacts
+
   llm-provider:
-    description: 'LLM provider for agentic mode. Options: openai or rapidapi'
+    description: 'LLM provider used when mode is agentic. Options are openai or rapidapi.'
     required: false
     default: openai
 
   openai-api-key:
-    description: 'Optional OpenAI API key for agentic planning and summarization'
+    description: 'Optional OpenAI API key for agentic planning and summarization. Required only when mode is agentic and llm-provider is openai.'
     required: false
-
-  openai-model:
-    description: 'OpenAI model to use for agentic mode'
-    required: false
-    default: gpt-4o-mini
 
   rapidapi-key:
-    description: 'Optional RapidAPI key for agentic mode'
+    description: 'Optional RapidAPI key for agentic planning and summarization. Required only when mode is agentic and llm-provider is rapidapi.'
     required: false
 
   rapidapi-host:
-    description: 'RapidAPI host'
+    description: 'RapidAPI host to call when llm-provider is rapidapi.'
     required: false
     default: open-ai21.p.rapidapi.com
 
   rapidapi-endpoint:
-    description: 'RapidAPI endpoint to call when llm-provider is rapidapi. Example: claude3'
+    description: 'RapidAPI endpoint to call when llm-provider is rapidapi. Example: claude3 or conversationllama.'
     required: false
     default: claude3
 
+  model:
+    description: 'Model name used when mode is agentic.'
+    required: false
+    default: gpt-4o-mini
+
+  comment-marker:
+    description: 'Hidden marker used to update the same PR comment on repeated runs.'
+    required: false
+    default: '<!-- mergeguard-ui-review -->'
+
 runs:
-  using: node24
-  main: dist/index.js
+  using: composite
+  steps:
+    - name: Install MergeGuard dependencies
+      shell: bash
+      run: |
+        cd "${{ github.action_path }}"
+        corepack enable
+        corepack prepare pnpm@9 --activate
+        pnpm install --no-frozen-lockfile
+
+    - name: Compile MergeGuard source
+      shell: bash
+      run: |
+        cd "${{ github.action_path }}"
+        pnpm exec tsc
+
+    - name: Run MergeGuard
+      shell: bash
+      env:
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+        INPUT_PREVIEW_URL: ${{ inputs.preview-url }}
+        INPUT_MODE: ${{ inputs.mode }}
+        INPUT_FAIL_ON_SEVERITY: ${{ inputs.fail-on-severity }}
+        INPUT_ARTIFACT_DIR: ${{ inputs.artifact-dir }}
+        INPUT_LLM_PROVIDER: ${{ inputs.llm-provider }}
+        INPUT_OPENAI_API_KEY: ${{ inputs.openai-api-key }}
+        INPUT_RAPIDAPI_KEY: ${{ inputs.rapidapi-key }}
+        INPUT_RAPIDAPI_HOST: ${{ inputs.rapidapi-host }}
+        INPUT_RAPIDAPI_ENDPOINT: ${{ inputs.rapidapi-endpoint }}
+        INPUT_MODEL: ${{ inputs.model }}
+        INPUT_COMMENT_MARKER: ${{ inputs.comment-marker }}
+      run: |
+        cd "${{ github.action_path }}"
+        export MERGEGUARD_CHROMIUM_EXECUTABLE_PATH="${MERGEGUARD_CHROMIUM_EXECUTABLE_PATH:-/usr/bin/google-chrome}"
+        node lib/index.js
 
 branding:
   icon: shield
