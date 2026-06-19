@@ -19,7 +19,15 @@ async function ensureRunnerDirs(artifactDir: string): Promise<void> {
 export async function runBrowserChecks(options: BrowserRunOptions): Promise<BrowserCheckResult[]> {
   await ensureRunnerDirs(options.artifactDir);
 
-  const browser = await chromium.launch({ headless: true });
+  const chromiumExecutablePath =
+    process.env.MERGEGUARD_CHROMIUM_EXECUTABLE_PATH ||
+    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath: chromiumExecutablePath || undefined
+  });
+
   const results: BrowserCheckResult[] = [];
 
   try {
@@ -83,6 +91,7 @@ export async function runBrowserChecks(options: BrowserRunOptions): Promise<Brow
 
       try {
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+
         try {
           await page.waitForLoadState('networkidle', { timeout: 5_000 });
         } catch {
@@ -92,7 +101,11 @@ export async function runBrowserChecks(options: BrowserRunOptions): Promise<Brow
         if (item.checkType === 'accessibility') {
           axeViolations = await runA11yScan(page);
           await writeJson(a11yPath, axeViolations);
-          evidence.push({ type: 'json', localPath: a11yPath, note: 'Axe accessibility scan result' });
+          evidence.push({
+            type: 'json',
+            localPath: a11yPath,
+            note: 'Axe accessibility scan result'
+          });
         }
 
         if (['layout', 'visual'].includes(item.checkType)) {
@@ -108,7 +121,11 @@ export async function runBrowserChecks(options: BrowserRunOptions): Promise<Brow
         }
 
         await page.screenshot({ path: screenshotPath, fullPage: true });
-        evidence.push({ type: 'screenshot', localPath: screenshotPath, note: `${item.viewport} screenshot` });
+        evidence.push({
+          type: 'screenshot',
+          localPath: screenshotPath,
+          note: `${item.viewport} screenshot`
+        });
 
         if (
           pageErrors.length > 0 ||
@@ -127,7 +144,11 @@ export async function runBrowserChecks(options: BrowserRunOptions): Promise<Brow
         pageErrors.push(error instanceof Error ? error.message : String(error));
       } finally {
         await context.tracing.stop({ path: tracePath }).catch(() => undefined);
-        evidence.push({ type: 'trace', localPath: tracePath, note: 'Playwright trace' });
+        evidence.push({
+          type: 'trace',
+          localPath: tracePath,
+          note: 'Playwright trace'
+        });
 
         const raw = {
           item,
@@ -141,8 +162,14 @@ export async function runBrowserChecks(options: BrowserRunOptions): Promise<Brow
           interaction,
           notes
         };
+
         await writeJson(logPath, raw);
-        evidence.push({ type: 'log', localPath: logPath, note: 'Raw browser check log' });
+        evidence.push({
+          type: 'log',
+          localPath: logPath,
+          note: 'Raw browser check log'
+        });
+
         await context.close().catch(() => undefined);
       }
 
