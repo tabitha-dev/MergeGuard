@@ -3,78 +3,625 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MergeGuard Demo Bug Site</title>
+    <title>MergeGuard Demo Store</title>
+
     <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111827;
+        --panel-soft: #1f2937;
+        --text: #f9fafb;
+        --muted: #6b7280;
+        --muted-low-contrast: #4b5563;
+        --brand: #8b5cf6;
+        --brand-strong: #7c3aed;
+        --accent: #22d3ee;
+        --danger: #ef4444;
+        --success: #22c55e;
+        --card: #ffffff;
+        --card-text: #111827;
+        --border: rgba(255, 255, 255, 0.12);
+        --shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
       body {
         margin: 0;
-        font-family: system-ui, sans-serif;
-        background: #111827;
-        color: #8b8b8b;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(139, 92, 246, 0.28), transparent 36rem),
+          radial-gradient(circle at top right, rgba(34, 211, 238, 0.18), transparent 30rem),
+          var(--bg);
+        color: var(--text);
+        min-height: 100vh;
       }
-      header {
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      .page-shell {
+        width: min(1120px, calc(100% - 2rem));
+        margin: 0 auto;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(18px);
+        background: rgba(15, 23, 42, 0.76);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .header-inner {
+        min-height: 72px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1rem;
+        gap: 1rem;
       }
-      .wide-card {
-        width: 520px;
-        margin: 1rem;
-        padding: 1rem;
-        background: white;
-        color: #111827;
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.7rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
       }
-      nav {
+
+      .brand-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, var(--brand), var(--accent));
+        box-shadow: 0 12px 32px rgba(139, 92, 246, 0.35);
+      }
+
+      .nav-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        min-height: 44px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
+        padding: 0.7rem 1rem;
+        cursor: pointer;
+      }
+
+      .main-nav {
         display: none;
+        padding: 0 0 1rem;
       }
-      nav[data-open='true'] {
+
+      .main-nav[data-open="true"] {
         display: block;
       }
-      button {
-        padding: 0.75rem 1rem;
+
+      .nav-list {
+        display: grid;
+        gap: 0.55rem;
+        padding: 0;
+        margin: 0;
+        list-style: none;
       }
-      @media (min-width: 700px) {
-        nav {
+
+      .nav-link {
+        display: block;
+        padding: 0.85rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #e5e7eb;
+      }
+
+      .hero {
+        padding: 5rem 0 2.5rem;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: fit-content;
+        padding: 0.45rem 0.75rem;
+        border: 1px solid rgba(34, 211, 238, 0.28);
+        border-radius: 999px;
+        background: rgba(34, 211, 238, 0.08);
+        color: #a5f3fc;
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+
+      h1 {
+        margin: 1rem 0;
+        max-width: 760px;
+        font-size: clamp(2.4rem, 7vw, 5.5rem);
+        line-height: 0.95;
+        letter-spacing: -0.07em;
+      }
+
+      .hero-copy {
+        max-width: 680px;
+        color: #cbd5e1;
+        font-size: 1.15rem;
+        line-height: 1.7;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        margin-top: 1.6rem;
+      }
+
+      .primary-button,
+      .secondary-button,
+      .danger-button {
+        border: 0;
+        border-radius: 999px;
+        min-height: 46px;
+        padding: 0.85rem 1.15rem;
+        cursor: pointer;
+        font-weight: 800;
+      }
+
+      .primary-button {
+        color: white;
+        background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+        box-shadow: 0 20px 48px rgba(124, 58, 237, 0.34);
+      }
+
+      .secondary-button {
+        color: white;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--border);
+      }
+
+      .danger-button {
+        color: white;
+        background: var(--danger);
+      }
+
+      .dashboard {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .dashboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .window-dots {
+        display: flex;
+        gap: 0.4rem;
+      }
+
+      .dot {
+        width: 0.7rem;
+        height: 0.7rem;
+        border-radius: 999px;
+        background: #64748b;
+      }
+
+      .dashboard-body {
+        padding: 1rem;
+        display: grid;
+        gap: 1rem;
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(170px, 1fr));
+        gap: 1rem;
+      }
+
+      .metric {
+        border-radius: 22px;
+        padding: 1rem;
+        background: rgba(15, 23, 42, 0.68);
+        border: 1px solid var(--border);
+      }
+
+      .metric span {
+        display: block;
+        color: #94a3b8;
+        font-size: 0.8rem;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 0.35rem;
+        font-size: 1.7rem;
+      }
+
+      /*
+        Intentional layout bug:
+        This fixed-width strip creates horizontal overflow on mobile.
+        MergeGuard should detect this at small viewport widths.
+      */
+      .wide-card {
+        width: 720px;
+        padding: 1rem;
+        border-radius: 22px;
+        background: var(--card);
+        color: var(--card-text);
+        border: 1px solid #e5e7eb;
+      }
+
+      .wide-card h2 {
+        margin: 0 0 0.5rem;
+      }
+
+      .wide-card p {
+        margin: 0;
+        color: #374151;
+      }
+
+      .sections {
+        padding: 2rem 0 4rem;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .panel {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        padding: 1.25rem;
+      }
+
+      .panel h2 {
+        margin: 0 0 0.4rem;
+        letter-spacing: -0.03em;
+      }
+
+      /*
+        Intentional accessibility bug:
+        This paragraph has weak contrast against the dark panel.
+        Axe should report a color contrast violation.
+      */
+      .low-contrast-copy {
+        color: var(--muted-low-contrast);
+        line-height: 1.7;
+      }
+
+      .checkout-form {
+        display: grid;
+        gap: 0.9rem;
+        margin-top: 1rem;
+      }
+
+      .field {
+        display: grid;
+        gap: 0.35rem;
+      }
+
+      .field span {
+        font-size: 0.9rem;
+        color: #cbd5e1;
+      }
+
+      input {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 0.9rem 1rem;
+        color: white;
+        background: rgba(15, 23, 42, 0.72);
+        outline: none;
+      }
+
+      input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.14);
+      }
+
+      .two-column {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .status-list {
+        display: grid;
+        gap: 0.8rem;
+        padding: 0;
+        margin: 1rem 0 0;
+        list-style: none;
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.8rem;
+        border-radius: 16px;
+        background: rgba(15, 23, 42, 0.7);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0.25rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+      }
+
+      .pill.pass {
+        color: #bbf7d0;
+        background: rgba(34, 197, 94, 0.15);
+      }
+
+      .pill.warn {
+        color: #fed7aa;
+        background: rgba(249, 115, 22, 0.15);
+      }
+
+      .footer {
+        border-top: 1px solid var(--border);
+        padding: 1.5rem 0;
+        color: #94a3b8;
+      }
+
+      @media (min-width: 760px) {
+        .nav-toggle {
+          display: none;
+        }
+
+        .main-nav {
+          display: block;
+          padding: 0;
+        }
+
+        .nav-list {
           display: flex;
-          gap: 1rem;
+          align-items: center;
+          gap: 0.7rem;
+        }
+
+        .nav-link {
+          border: 0;
+          background: transparent;
+          padding: 0.5rem 0.65rem;
+        }
+
+        .hero {
+          grid-template-columns: 1.1fr 0.9fr;
+          align-items: center;
+        }
+
+        .two-column {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 759px) {
+        .metric-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          padding-top: 3rem;
+        }
+
+        /*
+          Intentional mobile bug:
+          The menu opens, but it is pushed below the header and not focus-managed correctly.
+        */
+        .main-nav[data-open="true"] {
+          margin-top: -0.25rem;
         }
       }
     </style>
   </head>
+
   <body>
-    <header>
-      <strong>Demo Store - Final Self Test</strong>
-      <button aria-expanded="false" aria-label="menu" id="menuButton">Menu</button>
+    <header class="site-header">
+      <div class="page-shell">
+        <div class="header-inner">
+          <a class="brand" href="#" aria-label="MergeGuard Demo Store home">
+            <span class="brand-mark" aria-hidden="true">MG</span>
+            <span>Demo Store - Better Self Test</span>
+          </a>
+
+          <button
+            class="nav-toggle"
+            id="menuButton"
+            type="button"
+            aria-expanded="false"
+            aria-controls="mainNav"
+            aria-label="Open navigation menu"
+          >
+            Menu
+          </button>
+
+          <nav class="main-nav" id="mainNav" aria-label="Primary navigation">
+            <ul class="nav-list">
+              <li><a class="nav-link" href="#features">Features</a></li>
+              <li><a class="nav-link" href="#checkout">Checkout</a></li>
+              <li><a class="nav-link" href="#status">Status</a></li>
+            </ul>
+          </nav>
+        </div>
+      </div>
     </header>
-    <nav id="mainNav">
-      <a href="#">Home</a>
-      <a href="#">Pricing</a>
-      <a href="#">Contact</a>
-    </nav>
+
     <main>
-      <section class="wide-card">
-        <h1>Intentionally wide content for mobile overflow</h1>
-        <p>This demo page intentionally contains contrast, layout, and interaction bugs.</p>
+      <section class="page-shell hero">
+        <div>
+          <div class="eyebrow">🧪 Intentional bug target for MergeGuard</div>
+          <h1>Modern demo page with real UI regressions.</h1>
+          <p class="hero-copy">
+            This page is intentionally designed to look polished while still containing
+            frontend issues that MergeGuard can catch with browser evidence.
+          </p>
+
+          <div class="hero-actions">
+            <button class="primary-button" type="button">View release preview</button>
+            <button class="secondary-button" type="button">Read QA report</button>
+          </div>
+        </div>
+
+        <aside class="dashboard" aria-label="Demo QA dashboard">
+          <div class="dashboard-header">
+            <strong>Preview health</strong>
+            <div class="window-dots" aria-hidden="true">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+          </div>
+
+          <div class="dashboard-body">
+            <div class="metric-grid">
+              <div class="metric">
+                <span>Checks</span>
+                <strong>12</strong>
+              </div>
+              <div class="metric">
+                <span>Findings</span>
+                <strong>4</strong>
+              </div>
+              <div class="metric">
+                <span>Risk</span>
+                <strong>Med</strong>
+              </div>
+            </div>
+
+            <section class="wide-card" aria-labelledby="overflow-title">
+              <h2 id="overflow-title">Fixed-width release card</h2>
+              <p>
+                This card is intentionally too wide for mobile screens and should create
+                horizontal overflow evidence.
+              </p>
+            </section>
+          </div>
+        </aside>
       </section>
-      <form>
-        <label>Email <input type="email" /></label>
-        <button type="button" onclick="throw new Error('Demo submit failure')">Submit</button>
-      </form>
+
+      <section class="page-shell sections" id="features">
+        <div class="two-column">
+          <article class="panel">
+            <h2>Runtime review, not just static checks</h2>
+            <p class="low-contrast-copy">
+              This paragraph intentionally uses low-contrast text so accessibility scans
+              can catch a realistic dark mode regression.
+            </p>
+
+            <ul class="status-list" id="status">
+              <li class="status-item">
+                <span>Console monitoring</span>
+                <span class="pill pass">active</span>
+              </li>
+              <li class="status-item">
+                <span>Mobile overflow check</span>
+                <span class="pill warn">warning</span>
+              </li>
+              <li class="status-item">
+                <span>Axe accessibility scan</span>
+                <span class="pill warn">issue found</span>
+              </li>
+            </ul>
+          </article>
+
+          <article class="panel" id="checkout">
+            <h2>Checkout smoke test</h2>
+            <p class="hero-copy">
+              This form includes an intentional runtime error on submit so MergeGuard can
+              capture browser console and page error evidence.
+            </p>
+
+            <form class="checkout-form">
+              <label class="field">
+                <span>Email address</span>
+                <input type="email" placeholder="customer@example.com" autocomplete="email" />
+              </label>
+
+              <!-- Intentional accessibility issue: input has placeholder but no label -->
+              <input type="text" placeholder="Promo code without visible label" />
+
+              <button
+                class="danger-button"
+                type="button"
+                onclick="throw new Error('Demo checkout submit failure: payment summary is undefined')"
+              >
+                Submit checkout
+              </button>
+            </form>
+          </article>
+        </div>
+      </section>
     </main>
+
+    <footer class="footer">
+      <div class="page-shell">
+        Built for MergeGuard UI self-testing. This page intentionally contains demo bugs.
+      </div>
+    </footer>
+
     <script>
       const button = document.getElementById('menuButton');
       const nav = document.getElementById('mainNav');
+
       button.addEventListener('click', () => {
         const open = button.getAttribute('aria-expanded') === 'true';
         button.setAttribute('aria-expanded', String(!open));
+        button.setAttribute(
+          'aria-label',
+          open ? 'Open navigation menu' : 'Close navigation menu'
+        );
         nav.dataset.open = String(!open);
       });
+
       document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
           nav.dataset.open = 'false';
           button.setAttribute('aria-expanded', 'false');
-          const missingRef = undefined;
-          missingRef.focus();
+          button.setAttribute('aria-label', 'Open navigation menu');
+
+          /*
+            Intentional interaction bug:
+            This simulates a missing focus restore ref after closing a mobile menu.
+            MergeGuard should capture this as a page error during interaction checks.
+          */
+          const missingFocusRestoreRef = undefined;
+          missingFocusRestoreRef.focus();
         }
       });
     </script>
