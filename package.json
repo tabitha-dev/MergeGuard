@@ -1,0 +1,32 @@
+{
+  "name": "mergeguard-action",
+  "version": "0.1.0",
+  "description": "Agentic frontend PR reviewer using Playwright browser evidence.",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
+    "check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "release:check": "npm run check && npm run build",
+    "playwright:install": "playwright install chromium --with-deps"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.1",
+    "@axe-core/playwright": "^4.10.2",
+    "openai": "^4.104.0",
+    "playwright": "^1.52.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@vercel/ncc": "^0.38.3",
+    "prettier": "^3.5.0",
+    "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

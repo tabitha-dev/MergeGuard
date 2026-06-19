@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MergeGuard Demo Bug Site</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #111827;
+        color: #8b8b8b;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+      }
+      .wide-card {
+        width: 520px;
+        margin: 1rem;
+        padding: 1rem;
+        background: white;
+        color: #111827;
+      }
+      nav {
+        display: none;
+      }
+      nav[data-open='true'] {
+        display: block;
+      }
+      button {
+        padding: 0.75rem 1rem;
+      }
+      @media (min-width: 700px) {
+        nav {
+          display: flex;
+          gap: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <strong>Demo Store</strong>
+      <button aria-expanded="false" aria-label="menu" id="menuButton">Menu</button>
+    </header>
+    <nav id="mainNav">
+      <a href="#">Home</a>
+      <a href="#">Pricing</a>
+      <a href="#">Contact</a>
+    </nav>
+    <main>
+      <section class="wide-card">
+        <h1>Intentionally wide content for mobile overflow</h1>
+        <p>This demo page intentionally contains contrast, layout, and interaction bugs.</p>
+      </section>
+      <form>
+        <label>Email <input type="email" /></label>
+        <button type="button" onclick="throw new Error('Demo submit failure')">Submit</button>
+      </form>
+    </main>
+    <script>
+      const button = document.getElementById('menuButton');
+      const nav = document.getElementById('mainNav');
+      button.addEventListener('click', () => {
+        const open = button.getAttribute('aria-expanded') === 'true';
+        button.setAttribute('aria-expanded', String(!open));
+        nav.dataset.open = String(!open);
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          nav.dataset.open = 'false';
+          button.setAttribute('aria-expanded', 'false');
+          const missingRef = undefined;
+          missingRef.focus();
+        }
+      });
+    </script>
+  </body>
+</html>
