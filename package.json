@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Agentic frontend PR reviewer using Playwright browser evidence.",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "main": "dist/index.js",
   "scripts": {
     "build": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
